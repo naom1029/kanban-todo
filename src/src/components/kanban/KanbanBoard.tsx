@@ -44,7 +44,13 @@ export const KanbanBoard = () => {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    if (over && active.id !== over.id) {
+    if (!over) {
+      setActiveTask(null);
+      return;
+    }
+    // over.idがカラムのIDであることを確認
+    const column = columns.find((col) => col.id === over.id);
+    if (column && active.id !== over.id) {
       const newStatus = over.id as TaskStatus;
       moveTask(active.id as string, newStatus);
     }
