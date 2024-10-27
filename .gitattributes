@@ -1,0 +1,23 @@
+# すべてのテキストファイルでLFを使用する
+* text=auto eol=lf
+
+# ソースコードや設定ファイルをLFに統一
+*.js     text eol=lf
+*.jsx    text eol=lf
+*.ts     text eol=lf
+*.tsx    text eol=lf
+*.css    text eol=lf
+*.scss   text eol=lf
+*.html   text eol=lf
+*.json   text eol=lf
+*.md     text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+*.sh     text eol=lf
+*.rs     text eol=lf
+*.toml   text eol=lf
+*.lock   text eol=lf
+
+# Windows固有のファイル形式はそのまま（改行コードの変換をしない）
+*.bat    text eol=crlf
+*.cmd    text eol=crlf

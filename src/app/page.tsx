@@ -1,5 +1,9 @@
-const Top = async () => {
-  return <h1 className="text-blue-500">Hello, Next.js!</h1>;
-};
+import { KanbanBoard } from "../src/components/kanban/KanbanBoard";
 
-export default Top;
+export default function Home() {
+  return (
+    <main className="container mx-auto">
+      <KanbanBoard />
+    </main>
+  );
+}
