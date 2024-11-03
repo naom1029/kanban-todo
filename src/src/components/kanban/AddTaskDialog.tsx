@@ -10,8 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { TaskStatus } from "@/types/todoType";
 import { useState } from "react";
+import { addTaskToDatabase } from "@/services/taskService";
 import { useTaskStore } from "@/store/tasks";
-
 interface AddTaskDialogProps {
   status: TaskStatus;
   isOpen: boolean;
@@ -25,14 +25,18 @@ export const AddTaskDialog = ({
 }: AddTaskDialogProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const addTask = useTaskStore((state) => state.addTask);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    addTaskToDatabase(title, description, status, setError);
     addTask({
       title,
       description,
       status,
+      completedAt: undefined,
+      reminderAt: undefined,
     });
     setTitle("");
     setDescription("");

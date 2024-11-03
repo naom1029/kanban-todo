@@ -1,24 +1,19 @@
 import { create } from "zustand";
-import { Task, TaskStatus } from "@/types/todoType";
+import { Task, TaskStatus, Column } from "@/types/todoType";
 
 interface TaskStore {
   tasks: Task[];
-  columns: { id: TaskStatus; title: string }[];
+  Column: Column[];
+  setTasks: (tasks: Task[]) => void;
   addTask: (task: Omit<Task, "id" | "createdAt">) => void;
   updateTask: (id: string, task: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   moveTask: (taskId: string, newStatus: TaskStatus) => void;
-  addColumn: (title: string) => void;
-  deleteColumn: (id: TaskStatus) => void;
 }
 
 export const useTaskStore = create<TaskStore>((set) => ({
   tasks: [],
-  columns: [
-    { id: "todo", title: "Todo" },
-    { id: "in-progress", title: "In Progress" },
-    { id: "done", title: "Done" },
-  ],
+  setTasks: (tasks: Task[]) => set({ tasks }),
   addTask: (task) =>
     set((state) => ({
       tasks: [
@@ -45,17 +40,5 @@ export const useTaskStore = create<TaskStore>((set) => ({
       tasks: state.tasks.map((task) =>
         task.id === taskId ? { ...task, status: newStatus } : task
       ),
-    })),
-  addColumn: (title) =>
-    set((state) => ({
-      columns: [
-        ...state.columns,
-        { id: title.toLowerCase().replace(/\s+/g, "-"), title },
-      ],
-    })),
-  deleteColumn: (id) =>
-    set((state) => ({
-      columns: state.columns.filter((column) => column.id !== id),
-      tasks: state.tasks.filter((task) => task.status !== id),
     })),
 }));

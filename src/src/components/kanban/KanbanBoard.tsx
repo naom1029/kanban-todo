@@ -9,14 +9,24 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { Column } from "./Column";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Task as TaskType, TaskStatus } from "@/types/todoType";
 import { useTaskStore } from "@/store/tasks";
+import { useColumnStore } from "@/store/columns";
 import { Task } from "./Task";
 import { AddTaskDialog } from "./AddTaskDialog";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import {
+  addColumnToDatabase,
+  deleteColumnFromDatabase,
+  getColumns,
+} from "@/services/columnService";
+import {
+  loadTasksFromDatabase,
+  updateTaskInDatabase,
+} from "@/services/taskService";
 
 export const KanbanBoard = () => {
   const [activeTask, setActiveTask] = useState<TaskType | null>(null);
@@ -24,11 +34,12 @@ export const KanbanBoard = () => {
   const [newColumnTitle, setNewColumnTitle] = useState("");
   const [error, setError] = useState<string | null>(null);
   const tasks = useTaskStore((state) => state.tasks);
-  const columns = useTaskStore((state) => state.columns);
+  const columns = useColumnStore((state) => state.columns);
   const moveTask = useTaskStore((state) => state.moveTask);
-  const addColumn = useTaskStore((state) => state.addColumn);
-  const deleteColumn = useTaskStore((state) => state.deleteColumn);
-
+  const addColumn = useColumnStore((state) => state.addColumn);
+  const deleteColumn = useColumnStore((state) => state.deleteColumn);
+  const setTasks = useTaskStore((state) => state.setTasks);
+  const setColumns = useColumnStore((state) => state.setColumns);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -36,6 +47,23 @@ export const KanbanBoard = () => {
       },
     })
   );
+
+  useEffect(() => {
+    const fetchTasksAndColumns = async () => {
+      try {
+        const [loadedTasks, loadedColumns] = await Promise.all([
+          loadTasksFromDatabase(),
+          getColumns(),
+        ]);
+        setTasks(loadedTasks);
+        setColumns(loadedColumns);
+      } catch (error) {
+        setError((error as Error).message);
+      }
+    };
+
+    fetchTasksAndColumns();
+  }, []);
 
   const handleDragStart = (event: DragStartEvent) => {
     const task = tasks.find((t) => t.id === event.active.id);
@@ -52,7 +80,13 @@ export const KanbanBoard = () => {
     const column = columns.find((col) => col.id === over.id);
     if (column && active.id !== over.id) {
       const newStatus = over.id as TaskStatus;
+      //  ステータスの更新
       moveTask(active.id as string, newStatus);
+      updateTaskInDatabase(
+        active.id as string,
+        { status: newStatus },
+        setError
+      );
     }
     setActiveTask(null);
   };
@@ -69,6 +103,7 @@ export const KanbanBoard = () => {
         setError("同じ名前のカラムが既に存在します");
         return;
       }
+      addColumnToDatabase(title);
       addColumn(title);
       setNewColumnTitle("");
       setError("");
@@ -83,6 +118,7 @@ export const KanbanBoard = () => {
       setError("タスクが存在するカラムは削除できません");
       return;
     }
+    deleteColumnFromDatabase(columnId);
     deleteColumn(columnId);
   };
 

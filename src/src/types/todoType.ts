@@ -6,6 +6,8 @@ export interface Task {
   description: string;
   status: TaskStatus;
   createdAt: Date;
+  completedAt: Date | undefined;
+  reminderAt: Date | undefined;
 }
 
 export interface Column {
