@@ -1,11 +1,20 @@
 import { Task as TaskType } from "@/types/todoType";
-import { Card } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Trash2 } from "lucide-react";
+import { Trash2, Menu, Clock2, Edit2 } from "lucide-react";
 import { useTaskStore } from "@/store/tasks";
 import { deleteTaskFromDatabase } from "@/services/taskService";
 import { useState } from "react";
+import EditTaskDialog from "@/components/kanban/EditTaskDialog";
 
 interface TaskProps {
   task: TaskType;
@@ -13,11 +22,13 @@ interface TaskProps {
 
 export const Task = ({ task }: TaskProps) => {
   const deleteTask = useTaskStore((state) => state.deleteTask);
-  const [Error, setError] = useState<string | null>(null);
-  const handleDelete = () => {
+  const [error, setError] = useState<string | null>(null);
+
+  const handleDeleteButton = () => {
     deleteTask(task.id);
     deleteTaskFromDatabase(task.id, setError);
   };
+
   const {
     attributes,
     listeners,
@@ -29,7 +40,7 @@ export const Task = ({ task }: TaskProps) => {
     id: task.id,
     data: {
       type: "Task",
-      parent: task.status, // タスクの所属カラムIDを設定
+      parent: task.status,
     },
   });
 
@@ -40,25 +51,30 @@ export const Task = ({ task }: TaskProps) => {
   };
 
   return (
-    <Card
-      ref={setNodeRef}
-      style={style}
-      className="p-4 mb-2 cursor-move bg-white hover:shadow-md transition-shadow"
-      {...attributes}
-      {...listeners}
-    >
-      <div className="flex justify-between items-start">
-        <div>
-          <h3 className="font-medium text-sm">{task.title}</h3>
-          <p className="text-sm text-gray-500 mt-1">{task.description}</p>
-        </div>
-        <button
-          onClick={() => handleDelete()}
-          className="text-gray-400 hover:text-red-500 transition-colors"
-        >
-          <Trash2 size={16} />
-        </button>
-      </div>
-    </Card>
+    <EditTaskDialog task={task}>
+      <Card
+        ref={setNodeRef}
+        style={style}
+        className="mb-2 cursor-move bg-white hover:shadow-md transition-shadow"
+        {...attributes}
+        {...listeners}
+      >
+        <CardHeader className="flex-row flex justify-between items-start">
+          <div>
+            <CardTitle>{task.title}</CardTitle>
+            <CardDescription>{task.description}</CardDescription>
+          </div>
+        </CardHeader>
+        <CardContent></CardContent>
+        <CardFooter>
+          {task.reminderAt && (
+            <div className="text-gray-400">
+              <Clock2 />
+              <span className="ml-1">{task.reminderAt.toLocaleString()}</span>
+            </div>
+          )}
+        </CardFooter>
+      </Card>
+    </EditTaskDialog>
   );
 };

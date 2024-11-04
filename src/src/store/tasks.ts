@@ -3,7 +3,6 @@ import { Task, TaskStatus, Column } from "@/types/todoType";
 
 interface TaskStore {
   tasks: Task[];
-  Column: Column[];
   setTasks: (tasks: Task[]) => void;
   addTask: (task: Omit<Task, "id" | "createdAt">) => void;
   updateTask: (id: string, task: Partial<Task>) => void;

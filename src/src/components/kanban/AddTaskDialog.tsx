@@ -63,7 +63,6 @@ export const AddTaskDialog = ({
               placeholder="Task description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              required
             />
           </div>
           <DialogFooter>
