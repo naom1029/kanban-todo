@@ -7,14 +7,14 @@ import { Task } from "./Task";
 import { Column as ColumnType, Task as TaskType } from "@/types/todoType";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AddTaskDialog } from "./AddTaskDialog";
 
 interface ColumnProps {
   column: ColumnType;
   tasks: TaskType[];
-  onAddTask: () => void;
 }
 
-export const Column = ({ column, tasks, onAddTask }: ColumnProps) => {
+export const Column = ({ column, tasks }: ColumnProps) => {
   const { setNodeRef: setDroppableNodeRef } = useDroppable({
     id: column.id,
     data: {
@@ -42,13 +42,11 @@ export const Column = ({ column, tasks, onAddTask }: ColumnProps) => {
           ))}
         </SortableContext>
       </div>
-      <Button
-        variant="ghost"
-        onClick={onAddTask}
-        className="h-8 w-8 absolute bottom-2 left-2"
-      >
-        <Plus size={30} />
-      </Button>
+      <AddTaskDialog status={column.id}>
+        <Button variant="ghost" className="h-8 w-8 absolute bottom-2 left-2">
+          <Plus size={30} />
+        </Button>
+      </AddTaskDialog>
     </div>
   );
 };

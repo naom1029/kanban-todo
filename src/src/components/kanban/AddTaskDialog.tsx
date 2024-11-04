@@ -5,6 +5,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,15 +16,10 @@ import { addTaskToDatabase } from "@/services/taskService";
 import { useTaskStore } from "@/store/tasks";
 interface AddTaskDialogProps {
   status: TaskStatus;
-  isOpen: boolean;
-  onClose: () => void;
+  children: React.ReactNode;
 }
 
-export const AddTaskDialog = ({
-  status,
-  isOpen,
-  onClose,
-}: AddTaskDialogProps) => {
+export const AddTaskDialog = ({ status, children }: AddTaskDialogProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -40,11 +37,11 @@ export const AddTaskDialog = ({
     });
     setTitle("");
     setDescription("");
-    onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Add New Task</DialogTitle>
@@ -66,7 +63,9 @@ export const AddTaskDialog = ({
             />
           </div>
           <DialogFooter>
-            <Button type="submit">Add Task</Button>
+            <DialogClose asChild>
+              <Button type="submit">Add Task</Button>
+            </DialogClose>
           </DialogFooter>
         </form>
       </DialogContent>

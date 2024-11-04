@@ -6,7 +6,6 @@ import {
   DragStartEvent,
   PointerSensor,
   pointerWithin,
-  rectIntersection,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -16,7 +15,6 @@ import { Task as TaskType, TaskStatus } from "@/types/todoType";
 import { useTaskStore } from "@/store/tasks";
 import { useColumnStore } from "@/store/columns";
 import { Task } from "./Task";
-import { AddTaskDialog } from "./AddTaskDialog";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -32,7 +30,6 @@ import {
 
 export const KanbanBoard = () => {
   const [activeTask, setActiveTask] = useState<TaskType | null>(null);
-  const [addingToStatus, setAddingToStatus] = useState<TaskStatus | null>(null);
   const [newColumnTitle, setNewColumnTitle] = useState("");
   const [error, setError] = useState<string | null>(null);
   const tasks = useTaskStore((state) => state.tasks);
@@ -177,11 +174,7 @@ export const KanbanBoard = () => {
         <div className="flex gap-4 overflow-x-auto h-full pb-4">
           {columns.map((column) => (
             <div key={column.id} className="relative">
-              <Column
-                column={column}
-                tasks={tasksByColumn[column.id]}
-                onAddTask={() => setAddingToStatus(column.id)}
-              />
+              <Column column={column} tasks={tasksByColumn[column.id]} />
               <Button
                 variant="ghost"
                 size="icon"
@@ -195,11 +188,6 @@ export const KanbanBoard = () => {
         </div>
         <DragOverlay>{activeTask && <Task task={activeTask} />}</DragOverlay>
       </DndContext>
-      <AddTaskDialog
-        status={addingToStatus || "todo"}
-        isOpen={addingToStatus !== null}
-        onClose={() => setAddingToStatus(null)}
-      />
     </div>
   );
 };
