@@ -174,7 +174,7 @@ export const KanbanBoard = () => {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-4 overflow-x-auto pb-4">
+        <div className="flex gap-4 overflow-x-auto h-full pb-4">
           {columns.map((column) => (
             <div key={column.id} className="relative">
               <Column

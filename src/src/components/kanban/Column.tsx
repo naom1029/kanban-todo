@@ -26,12 +26,12 @@ export const Column = ({ column, tasks, onAddTask }: ColumnProps) => {
   return (
     <div
       ref={setDroppableNodeRef}
-      className="w-80 bg-gray-50 rounded-lg p-4 min-h-full"
+      className="w-80 bg-gray-50 rounded-lg p-4 relative"
     >
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-semibold text-gray-700">{column.title}</h2>
       </div>
-      <div className="min-h-[400px] relative">
+      <div className="mb-10">
         <SortableContext
           id={column.id}
           items={tasks.map((task) => task.id)}
@@ -44,11 +44,10 @@ export const Column = ({ column, tasks, onAddTask }: ColumnProps) => {
       </div>
       <Button
         variant="ghost"
-        size="icon"
         onClick={onAddTask}
         className="h-8 w-8 absolute bottom-2 left-2"
       >
-        <Plus size={16} />
+        <Plus size={30} />
       </Button>
     </div>
   );
