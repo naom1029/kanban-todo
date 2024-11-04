@@ -4,6 +4,8 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Trash2 } from "lucide-react";
 import { useTaskStore } from "@/store/tasks";
+import { deleteTaskFromDatabase } from "@/services/taskService";
+import { useState } from "react";
 
 interface TaskProps {
   task: TaskType;
@@ -11,6 +13,11 @@ interface TaskProps {
 
 export const Task = ({ task }: TaskProps) => {
   const deleteTask = useTaskStore((state) => state.deleteTask);
+  const [Error, setError] = useState<string | null>(null);
+  const handleDelete = () => {
+    deleteTask(task.id);
+    deleteTaskFromDatabase(task.id, setError);
+  };
   const {
     attributes,
     listeners,
@@ -18,7 +25,13 @@ export const Task = ({ task }: TaskProps) => {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: task.id });
+  } = useSortable({
+    id: task.id,
+    data: {
+      type: "Task",
+      parent: task.status, // タスクの所属カラムIDを設定
+    },
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -40,7 +53,7 @@ export const Task = ({ task }: TaskProps) => {
           <p className="text-sm text-gray-500 mt-1">{task.description}</p>
         </div>
         <button
-          onClick={() => deleteTask(task.id)}
+          onClick={() => handleDelete()}
           className="text-gray-400 hover:text-red-500 transition-colors"
         >
           <Trash2 size={16} />

@@ -5,11 +5,13 @@ import {
   DragOverlay,
   DragStartEvent,
   PointerSensor,
+  pointerWithin,
+  rectIntersection,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import { Column } from "./Column";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Task as TaskType, TaskStatus } from "@/types/todoType";
 import { useTaskStore } from "@/store/tasks";
 import { useColumnStore } from "@/store/columns";
@@ -72,23 +74,30 @@ export const KanbanBoard = () => {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    if (!over) {
-      setActiveTask(null);
+    setActiveTask(null);
+
+    if (!over || !active.id) {
       return;
     }
-    // over.idがカラムのIDであることを確認
-    const column = columns.find((col) => col.id === over.id);
-    if (column && active.id !== over.id) {
-      const newStatus = over.id as TaskStatus;
-      //  ステータスの更新
-      moveTask(active.id as string, newStatus);
+    let newStatus: TaskStatus | null = null;
+    // ドロップ先がタスクの場合
+    if (over.data.current?.type === "Task") {
+      newStatus = over.data.current.parent;
+    }
+    // ドロップ先がカラムの場合
+    else if (over.data.current?.type === "Column") {
+      newStatus = over.data.current.columnId;
+    }
+
+    if (newStatus && active.id !== over.id) {
+      // ステータスの更新
+      moveTask(active.id as string, newStatus as TaskStatus);
       updateTaskInDatabase(
         active.id as string,
         { status: newStatus },
         setError
       );
     }
-    setActiveTask(null);
   };
 
   const handleAddColumn = async (e: React.FormEvent) => {
@@ -103,14 +112,18 @@ export const KanbanBoard = () => {
         setError("同じ名前のカラムが既に存在します");
         return;
       }
-      addColumnToDatabase(title);
-      addColumn(title);
-      setNewColumnTitle("");
-      setError("");
+      try {
+        await addColumnToDatabase(title);
+        addColumn(title);
+        setNewColumnTitle("");
+        setError("");
+      } catch (error) {
+        setError((error as Error).message);
+      }
     }
   };
 
-  const handleDeleteColumn = (columnId: string) => {
+  const handleDeleteColumn = async (columnId: string) => {
     const tasksInColumn = tasks.filter(
       (task) => task.status === columnId
     ).length;
@@ -118,10 +131,22 @@ export const KanbanBoard = () => {
       setError("タスクが存在するカラムは削除できません");
       return;
     }
-    deleteColumnFromDatabase(columnId);
-    deleteColumn(columnId);
+    try {
+      await deleteColumnFromDatabase(columnId);
+      deleteColumn(columnId);
+    } catch (error) {
+      setError((error as Error).message);
+    }
   };
-
+  const tasksByColumn = useMemo(() => {
+    return columns.reduce(
+      (acc, column) => {
+        acc[column.id] = tasks.filter((task) => task.status === column.id);
+        return acc;
+      },
+      {} as Record<string, TaskType[]>
+    );
+  }, [tasks, columns]);
   return (
     <div className="p-8">
       <form onSubmit={handleAddColumn} className="mb-6">
@@ -145,15 +170,16 @@ export const KanbanBoard = () => {
 
       <DndContext
         sensors={sensors}
+        collisionDetection={pointerWithin}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-6 overflow-x-auto pb-4">
+        <div className="flex gap-4 overflow-x-auto pb-4">
           {columns.map((column) => (
             <div key={column.id} className="relative">
               <Column
                 column={column}
-                tasks={tasks.filter((task) => task.status === column.id)}
+                tasks={tasksByColumn[column.id]}
                 onAddTask={() => setAddingToStatus(column.id)}
               />
               <Button

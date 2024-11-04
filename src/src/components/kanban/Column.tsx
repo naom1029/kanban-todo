@@ -15,25 +15,25 @@ interface ColumnProps {
 }
 
 export const Column = ({ column, tasks, onAddTask }: ColumnProps) => {
-  const { setNodeRef } = useDroppable({
+  const { setNodeRef: setDroppableNodeRef } = useDroppable({
     id: column.id,
+    data: {
+      type: "Column",
+      columnId: column.id,
+    },
   });
 
   return (
-    <div className="w-80 bg-gray-50 rounded-lg p-4">
+    <div
+      ref={setDroppableNodeRef}
+      className="w-80 bg-gray-50 rounded-lg p-4 min-h-full"
+    >
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-semibold text-gray-700">{column.title}</h2>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onAddTask}
-          className="h-8 w-8"
-        >
-          <Plus size={16} />
-        </Button>
       </div>
-      <div ref={setNodeRef} className="min-h-[200px]">
+      <div className="min-h-[400px] relative">
         <SortableContext
+          id={column.id}
           items={tasks.map((task) => task.id)}
           strategy={verticalListSortingStrategy}
         >
@@ -42,6 +42,14 @@ export const Column = ({ column, tasks, onAddTask }: ColumnProps) => {
           ))}
         </SortableContext>
       </div>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onAddTask}
+        className="h-8 w-8 absolute bottom-2 left-2"
+      >
+        <Plus size={16} />
+      </Button>
     </div>
   );
 };
