@@ -24,29 +24,29 @@ export const Column = ({ column, tasks }: ColumnProps) => {
   });
 
   return (
-    <div
-      ref={setDroppableNodeRef}
-      className="w-80 bg-gray-50 rounded-lg p-4 relative"
-    >
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="font-semibold text-gray-700">{column.title}</h2>
+    // drop可能領域はKanbanboardの高さにする
+    <div ref={setDroppableNodeRef} className="h-full">
+      <div className="w-80 bg-gray-50 rounded-lg p-4 relative">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="font-semibold text-gray-700">{column.title}</h2>
+        </div>
+        <div className="mb-10">
+          <SortableContext
+            id={column.id}
+            items={tasks.map((task) => task.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {tasks.map((task) => (
+              <Task key={task.id} task={task} />
+            ))}
+          </SortableContext>
+        </div>
+        <AddTaskDialog status={column.id}>
+          <Button variant="ghost" className="h-8 w-8 absolute bottom-2 left-2">
+            <Plus size={30} />
+          </Button>
+        </AddTaskDialog>
       </div>
-      <div className="mb-10">
-        <SortableContext
-          id={column.id}
-          items={tasks.map((task) => task.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          {tasks.map((task) => (
-            <Task key={task.id} task={task} />
-          ))}
-        </SortableContext>
-      </div>
-      <AddTaskDialog status={column.id}>
-        <Button variant="ghost" className="h-8 w-8 absolute bottom-2 left-2">
-          <Plus size={30} />
-        </Button>
-      </AddTaskDialog>
     </div>
   );
 };
